@@ -1,5 +1,4 @@
-
-#import xml.dom.minidom as md 
+#!/usr/bin/env python3
 import argparse # Модуль обработки аргументов командной строки
 import sys
 
