@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<theatre>
+	<actors>
+		<actor
+			name="Петр"
+			surname="Петров"
+			secname="Петрович"
+			rank="2"
+			experience="5"
+			id="1"/>
+		<actor
+			name="Иван"
+			surname="Иванов"
+			secname="Иванович"
+			rank="1"
+			experience="3"
+			id="2"/>
+		<actor
+			name="Павел"
+			surname="Павлов"
+			secname="Павлович"
+			rank="3"
+			experience="4"
+			id="3"/>
+		<actor
+			name="Петр"
+			surname="Иванов"
+			secname="Павлович"
+			rank="2"
+			experience="4"
+			id="4"/>
+	</actors>		
+	<perfs>
+		<perf
+			name="Красная Шапочка"
+			year="2020"
+			budget="15000"
+			id="1"/>
+		<perf
+			name="Маугли"
+			year="2018"
+			budget="10000"
+			id="2"/>
+		<perf
+			name="Ромео и Джульетта"
+			year="2018"
+			budget="20000"
+			id="3"/>
+	</perfs>
+	<emaips>
+		<emaip id="2" perf="1" actorid="3" cost="3500" role="Бабушка"/>
+		<emaip id="3" perf="1" actorid="4" cost="4000" role="Серый волк"/>
+		<emaip id="4" perf="3" actorid="3" cost="5000" role="Джульетта"/>
+		<emaip id="5" perf="2" actorid="2" cost="500" role="Маугли"/>
+	</emaips>
+</theatre>
