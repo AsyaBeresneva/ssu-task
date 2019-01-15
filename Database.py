@@ -1,59 +1,101 @@
+from collections import OrderedDict
+import sqlite3
+
+
 class db:
-    __initstr = '''
-    CREATE TABLE actors (
-        code INTEGER PRIMARY KEY,
-        name TEXT,
-        surname TEXT,
-        secname TEXT,
-        rank TEXT,
-        experience TEXT
+    __actors = {}
+    __performances = {}
+    __emaips = {}
+    __client_attributes = []
+    __product_attributes = []
+    __sale_attributes = []
+    __path = '' # Path to the database
+    __conn = ''
+    __cursor = ''
+
+    __create_clients = '''
+    CREATE TABLE IF NOT EXISTS {} ({});
+    '''
+    __create_products = '''
+    CREATE TABLE IF NOT EXISTS {} ({});
+    '''
+    __create_sales = '''
+    CREATE TABLE IF NOT EXISTS {}
+    (
+        {},
+        FOREIGN KEY (client) REFERENCES clients(id),
+        FOREIGN KEY (product) REFERENCES products(id)
     );
-
-    CREATE TABLE perfs (
-        code INTEGER PRIMARY KEY,
-        name TEXT,
-        year TEXT,
-        budget TEXT
-    );
-
-    CREATE TABLE emaips (
-        id INTEGER PRIMARY KEY,
-        perf TEXT,
-        actorid TEXT,
-        cost TEXT,
-        role TEXT
-    );
     '''
 
-    __get_actor = 'SELECT * FROM actors;'
-    __get_perf  = 'SELECT * FROM perfs;'
-    __get_emaip = 'SELECT * FROM emaips;'
+    def __init__(self,
+            path,
+            clients,
+            products,
+            sales,
+            client_attributes,
+            product_attributes,
+            sale_attributes):
+        self.__clients = clients
+        self.__client_attributes = client_attributes
 
-    __set_actor = '''
-    INSERT INTO actors (name,
-        surname,
-        secname,
-        rank,
-        experience)
-        VALUES (:1, :2, :3, :4, :5)
-        ON CONFLICT DO UPDATE SET name=:1,
-            surname=:2,
-            secname=:3,
-            rank=:4,
-            experience=:5;
-    '''
-    __set_perf = '''
-    '''
-    __set_emaip = '''
-    '''
+        self.__products = products
+        self.__product_attributes = product_attributes
 
-    def __init__(self, actors, perfs, emaips):
-        self.__clients = __clients
-        pass
+        self.__sales = sales
+        self.__sale_attributes = sale_attributes
 
-    def read(self, path):
-        pass
+        # Establish database connection
+        self.__path = path
+        self.__conn = sqlite3.connect(self.__path)
+        self.__cursor = self.__conn.cursor()
 
-    def write(self, path):
-        pass
+    def __attr_list(self, alist, dots=False):
+        '''
+        Склеить лист колоночек для создания таблички.
+        '''
+        attrs = ''
+        if not dots:
+            for elem in alist:
+                attrs += elem + ' TEXT' + ', '
+        else:
+            for elem in alist:
+                attrs += ':' + elem + ', '
+        attrs = attrs[:-2]
+        return attrs
+
+    def __create_table(self, tname, attrs, query):
+        '''
+        Создаём табличку. Принимаем её имя, список колоночек и шаблон
+        SQL запроса.
+        '''
+        print('Creating table {}'.format(tname))
+        print(query.format(tname, self.__attr_list(attrs)))
+        self.__conn.execute(query.format(tname, self.__attr_list(attrs)))
+        self.__conn.commit()
+
+    def __dump_data(self, tname, attributes, objects):
+        query = 'INSERT INTO {} VALUES ({})'.format(tname, self.__attr_list(attributes, True))
+        print('Executing query: {}'.format(query))
+        for key, value in objects.items():
+            tmp_val = value.as_dict()
+            tmp_val['id'] = key
+            if 'product' in tmp_val:
+                tmp_val['product'] = list(self.__products.keys())[list(self.__products.values()).index(value.getProduct())]
+            if 'client' in tmp_val:
+                tmp_val['client'] = list(self.__clients.keys())[list(self.__clients.values()).index(value.getClient())]
+            self.__conn.execute(query, tmp_val)
+        self.__conn.commit()
+
+    def save(self):
+        '''
+        Функция сохранения таблички.
+        '''
+        self.__create_table('clients', self.__client_attributes, self.__create_clients)
+        self.__create_table('products', self.__product_attributes, self.__create_products)
+        self.__create_table('sales', self.__sale_attributes, self.__create_sales)
+
+        self.__dump_data('clients', self.__client_attributes, self.__clients)
+        self.__dump_data('products', self.__product_attributes, self.__products)
+        self.__dump_data('sales', self.__sale_attributes, self.__sales)
 
