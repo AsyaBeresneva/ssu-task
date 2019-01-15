@@ -9,8 +9,10 @@ class writer:
     __dumpname = '' # В который сохранять
     __rootname = '' # Имя корневого элемента  
     __rootnode = ''
+    __actors = dict()
+    __performances = dict()
 
-    def __init__(self, dumpname, rootnode):
+    def __init__(self, dumpname, rootnode, actors, performances):
         '''
         Создаёт объект XML документа, который должен быть записан
         в файл.
@@ -20,6 +22,8 @@ class writer:
         root = self.__xmldoc.createElement(self.__rootname) # Создаем элемент
         self.__xmldoc.appendChild(root) # Возвращаем ссылку и добавляем элемент
         self.__rootnode = self.__xmldoc.getElementsByTagName(self.__rootname)[0] # Собираем нужные части
+        self.__actors = actors
+        self.__performances = performances
 
     def add_group(self, groupname):
         '''
@@ -28,14 +32,20 @@ class writer:
         xmlgroup = self.__xmldoc.createElement(groupname)
         self.__rootnode.appendChild(xmlgroup)
 
-    def add_element(self, groupname, elemname, attributes):
+    def add_element(self, groupname, elemname, el_key, el_val):
         '''
         Вставляет элемент elemname с атрибутами из словаря attributes в
         группу groupname.
         '''
         subgroup = self.__rootnode.getElementsByTagName(groupname)[0]
         newelem = self.__xmldoc.createElement(elemname)
-        for attr, value in attributes.items():
+        for attr, value in el_val.as_dict().items(): #Объект преобразуем в словарь
+            if attr == 'actorid':
+                newelem.setAttribute(attr, str(list(self.__actors.keys())[list(self.__actors.values()).index(el_val.get_actor())]))
+                continue
+            if attr == 'perf':
+                newelem.setAttribute(attr, str(list(self.__performances.keys())[list(self.__performances.values()).index(el_val.get_perf())]))
+                continue
             newelem.setAttribute(attr, value)
         subgroup.appendChild(newelem)
 

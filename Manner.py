@@ -117,8 +117,11 @@ class manner:
 			if line.startswith('new emaip'):
 				print('Добавление нового расписания')
 				properties = self.__read_properties(self.__emaip_attributes)
-				emaip_obj = Emaip.emaip(properties, self.__actors, self.__performances)
-				self.__add_element(self.__emaips, emaip_obj)
+				try:
+					emaip_obj = Emaip.emaip(properties, self.__actors, self.__performances)
+					self.__add_element(self.__emaips, emaip_obj)
+				except:
+					print('Неверный id')
 				continue
 			if line.startswith('del actor'):
 				print('Удаление актера')

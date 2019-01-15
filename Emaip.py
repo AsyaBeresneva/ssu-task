@@ -61,7 +61,7 @@ class emaip:
         Вернуть все поля объекта в виде словаря
         '''
         return { 'perf': self.__perf,
-            'cost': self.__cosc,
+            'cost': self.__cost,
             'role': self.__role,
             'actorid': self.__actor }
 

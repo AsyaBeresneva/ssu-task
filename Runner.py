@@ -84,16 +84,16 @@ class runner:
         '''
         Сохранить структуры данных в XML файл.
         '''
-        dump = Parser.writer(xmlfile, 'theatre')
+        dump = Parser.writer(xmlfile, 'theatre', self.__actors, self.__performances)
         dump.add_group('actors')
         dump.add_group('perfs')
         dump.add_group('emaips')
         for actor_key, actor_val in self.__actors.items():
-            dump.add_element('actors', 'actor', actor_val.as_dict())
+            dump.add_element('actors', 'actor', actor_key, actor_val)
         for perf_key, perf_val in self.__performances.items():
-            dump.add_element('perfs', 'perf', perf_val.as_dict())
+            dump.add_element('perfs', 'perf', perf_key, perf_val)
         for emaip_key, emaip_val in self.__emaips.items():
-            dump.add_element('emaips', 'emaip', emaip_val.as_dict())
+            dump.add_element('emaips', 'emaip', emaip_key, emaip_val)
         dump.dump()
 
     def save_to_sqlite(self, dbfile='db.sqlite3'):
