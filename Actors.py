@@ -78,6 +78,6 @@ class actors:
         return { 'name': self.__name,
             'surname': self.__surname,
             'secname': self.__secname,
-            'ranc': self.__ranc,
+            'rank': self.__ranc,
             'experience': self.__experience}
 
