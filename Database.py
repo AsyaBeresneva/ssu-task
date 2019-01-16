@@ -1,54 +1,60 @@
 from collections import OrderedDict
 import sqlite3
 
+import Actors
+import Perf
+import Emaip
 
 class db:
     __actors = {}
-    __performances = {}
+    __perfs = {}
     __emaips = {}
-    __client_attributes = []
-    __product_attributes = []
-    __sale_attributes = []
+    __actor_attributes = []
+    __perf_attributes = []
+    __emaip_attributes = []
     __path = '' # Path to the database
     __conn = ''
     __cursor = ''
 
-    __create_clients = '''
+    __create_actors = '''
     CREATE TABLE IF NOT EXISTS {} ({});
     '''
-    __create_products = '''
+    __create_perfs = '''
     CREATE TABLE IF NOT EXISTS {} ({});
     '''
-    __create_sales = '''
+    __create_emaips = '''
     CREATE TABLE IF NOT EXISTS {}
     (
         {},
-        FOREIGN KEY (client) REFERENCES clients(id),
-        FOREIGN KEY (product) REFERENCES products(id)
+        FOREIGN KEY (actors) REFERENCES actors(id),
+        FOREIGN KEY (perf) REFERENCES perfs(id)
     );
     '''
 
     def __init__(self,
             path,
-            clients,
-            products,
-            sales,
-            client_attributes,
-            product_attributes,
-            sale_attributes):
-        self.__clients = clients
-        self.__client_attributes = client_attributes
+            actors,
+            perfs,
+            emaips,
+            actor_attributes,
+            perf_attributes,
+            emaip_attributes):
+        self.__actors = actors
+        self.__actor_attributes = actor_attributes
 
-        self.__products = products
-        self.__product_attributes = product_attributes
+        self.__perfs = perfs
+        self.__perf_attributes = perf_attributes
 
-        self.__sales = sales
-        self.__sale_attributes = sale_attributes
+        self.__emaips = emaips
+        self.__emaip_attributes = emaip_attributes
 
-        # Establish database connection
+        # Устанавливаем соединение с базой данных
         self.__path = path
         self.__conn = sqlite3.connect(self.__path)
         self.__cursor = self.__conn.cursor()
+        self.__conn.row_factory = sqlite3.Row
+        #self.__row_factory = self.__dict_factory
+        #self.__row_factory = self.__dict_factory
 
     def __attr_list(self, alist, dots=False):
         '''
@@ -80,10 +86,10 @@ class db:
         for key, value in objects.items():
             tmp_val = value.as_dict()
             tmp_val['id'] = key
-            if 'product' in tmp_val:
-                tmp_val['product'] = list(self.__products.keys())[list(self.__products.values()).index(value.getProduct())]
-            if 'client' in tmp_val:
-                tmp_val['client'] = list(self.__clients.keys())[list(self.__clients.values()).index(value.getClient())]
+            if 'actors' in tmp_val:
+                tmp_val['actors'] = list(self.__actors.keys())[list(self.__actors.values()).index(value.get_actor())]
+            if 'perfs' in tmp_val:
+                tmp_val['perfs'] = list(self.__perfs.keys())[list(self.__perfs.values()).index(value.get_perf())]
             self.__conn.execute(query, tmp_val)
         self.__conn.commit()
 
@@ -91,11 +97,52 @@ class db:
         '''
         Функция сохранения таблички.
         '''
-        self.__create_table('clients', self.__client_attributes, self.__create_clients)
-        self.__create_table('products', self.__product_attributes, self.__create_products)
-        self.__create_table('sales', self.__sale_attributes, self.__create_sales)
+        self.__create_table('actors', self.__actor_attributes, self.__create_actors)
+        self.__create_table('perfs', self.__perf_attributes, self.__create_perfs)
+        self.__create_table('emaips', self.__emaip_attributes, self.__create_emaips)
 
-        self.__dump_data('clients', self.__client_attributes, self.__clients)
-        self.__dump_data('products', self.__product_attributes, self.__products)
-        self.__dump_data('sales', self.__sale_attributes, self.__sales)
+        self.__dump_data('actors', self.__actor_attributes, self.__actors)
+        self.__dump_data('perfs', self.__perf_attributes, self.__perfs)
+        self.__dump_data('emaips', self.__emaip_attributes, self.__emaips)
 
+    def __row2dict(self, inrow):
+        return dict(zip(inrow.keys(), inrow))
+
+    def __read_table(self, tname, objdict, objattribtes):
+        self.__cursor = self.__conn.cursor()
+        self.__cursor.execute('SELECT * FROM `{}`'.format(tname))
+        rows = [dict(row) for row in self.__cursor]
+        return rows
+
+    def read(self):
+        '''
+        Читать из базы.
+        '''
+        actors = self.__read_table('actors', self.__actors, self.__actor_attributes)
+        perfs = self.__read_table('perfs', self.__perfs, self.__perf_attributes)
+        emaips = self.__read_table('emaips', self.__emaips, self.__emaip_attributes)
+
+        for actor in actors:
+            actor_obj = Actors.actors(actor)                      #обходим конкретные атрибуты определенного клиента
+            self.__actors[actor['id']] = actor_obj         #соотносим конкретному клиенту ID
+
+        # Преобразуем dict клиентов в OrderedDict
+        self.__actors = OrderedDict(sorted(self.__actors.items()))
+
+        for perf in perfs:
+            perf_obj = Perfs.perf(perf)
+            self.__perfs[perf['id']] = perf_obj
+
+        # Преобразуем dict продуктов в defaultdict
+        self.__perfs = OrderedDict(sorted(self.__perfs.items()))
+
+        for emaip in emaips:
+            try:
+                emaip_obj = Emaips.emaip(emaip, self.__actors, self.__perfs)
+                self.__emaips[emaip['id']] = emaip_obj
+            except:
+                if not emaip['actor'] in self.__actors.keys():
+                    print('Отсутствует ссылка на актера: {}'.format(emaip['actor']))
+                if not emaip['perf'] in self.__perfs.keys():
+                    print('Отсутствует ссылка на спектакль: {}'.format(emaip['perf']))
+        self.__emaips = OrderedDict(sorted(self.__emaips.items()))

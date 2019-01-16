@@ -57,7 +57,8 @@ class writer:
         self.__xmldoc.writexml(writer=handle,
             indent='',
             addindent='\t',
-            newl='\n', encoding='utf8')
+            newl='\n', 
+            encoding='UTF-8')
         handle.close()
 
 class parser:

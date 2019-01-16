@@ -78,7 +78,14 @@ class runner:
         '''
         Прочитать данные для работы из базы данных SQLite3.
         '''
-        print('Run from sqlite')
+         database = Database.db(dbfile,
+            self.__actors,
+            self.__performances,
+            self.__emaips,
+            self.__actor_attributes,
+            self.__performance_attributes,
+            self.__emaip_attributes)
+        database.read()
 
     def save_to_xml(self, xmlfile='new.xml'):
         '''
@@ -101,12 +108,12 @@ class runner:
         Сохранить результаты работы в базу данных SQLite3.
         '''
         database = Database.db(dbfile,
-            self.__clients,
-            self.__products,
-            self.__sales,
-            self.__client_attributes,
-            self.__product_attributes,
-            self.__sale_attributes)
+            self.__actors,
+            self.__performances,
+            self.__emaips,
+            self.__actor_attributes,
+            self.__performance_attributes,
+            self.__emaip_attributes)
         database.save()
 
     def repl(self):
