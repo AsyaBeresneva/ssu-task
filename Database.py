@@ -26,7 +26,7 @@ class db:
     CREATE TABLE IF NOT EXISTS {}
     (
         {},
-        FOREIGN KEY (actors) REFERENCES actors(id),
+        FOREIGN KEY (actorid) REFERENCES actors(id),
         FOREIGN KEY (perf) REFERENCES perfs(id)
     );
     '''
