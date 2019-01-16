@@ -78,7 +78,7 @@ class runner:
         '''
         Прочитать данные для работы из базы данных SQLite3.
         '''
-         database = Database.db(dbfile,
+        database = Database.db(dbfile,
             self.__actors,
             self.__performances,
             self.__emaips,

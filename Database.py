@@ -26,7 +26,7 @@ class db:
     CREATE TABLE IF NOT EXISTS {}
     (
         {},
-        FOREIGN KEY (actors) REFERENCES actors(id),
+        FOREIGN KEY (actorid) REFERENCES actors(id),
         FOREIGN KEY (perf) REFERENCES perfs(id)
     );
     '''
@@ -86,10 +86,10 @@ class db:
         for key, value in objects.items():
             tmp_val = value.as_dict()
             tmp_val['id'] = key
-            if 'actors' in tmp_val:
-                tmp_val['actors'] = list(self.__actors.keys())[list(self.__actors.values()).index(value.get_actor())]
-            if 'perfs' in tmp_val:
-                tmp_val['perfs'] = list(self.__perfs.keys())[list(self.__perfs.values()).index(value.get_perf())]
+            if 'actorid' in tmp_val:
+                tmp_val['actorid'] = list(self.__actors.keys())[list(self.__actors.values()).index(value.get_actor())]
+            if 'perf' in tmp_val:
+                tmp_val['perf'] = list(self.__perfs.keys())[list(self.__perfs.values()).index(value.get_perf())]
             self.__conn.execute(query, tmp_val)
         self.__conn.commit()
 
